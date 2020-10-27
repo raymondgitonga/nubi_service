@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"os"
 )
 
 var (
@@ -13,8 +14,8 @@ func init() {
 }
 func StartApp() {
 	mapUrls()
-	if err := router.Run(":8082"); err != nil {
+	port := os.Getenv("PORT")
+	if err := router.Run(port); err != nil {
 		panic(err)
 	}
 }
-
