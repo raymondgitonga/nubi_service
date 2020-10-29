@@ -26,26 +26,31 @@ func (u *userService) GetUser(email string) (*dormain.User, *utils.AppError) {
 	if err != nil {
 		return nil, err
 	}
+	close(userChan)
+	close(errChan)
 
 	return user, nil
 }
 
 func (u *userService) GetUsers() (*[]dormain.User, *utils.AppError) {
 	errChan := make(chan *utils.AppError, 1)
-	userChan := make(chan *[]dormain.User, 1)
+	usersChan := make(chan *[]dormain.User, 1)
 
 	go func() {
 		users, err := dormain.GetUsers()
-		userChan <- users
+		usersChan <- users
 		errChan <- err
 	}()
 
 	err := <-errChan
-	users := <-userChan
+	users := <-usersChan
 
 	if err != nil {
 		return nil, err
 	}
+	close(usersChan)
+	close(errChan)
+
 	return users, nil
 }
 
@@ -66,6 +71,8 @@ func (u *userService) AddUser(user dormain.User) (*utils.SuccessResponse, *utils
 	if err != nil {
 		return nil, err
 	}
+	close(respChan)
+	close(errChan)
 
 	return resp, nil
 }
