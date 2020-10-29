@@ -9,12 +9,13 @@ type userService struct{}
 
 var (
 	UserService userService
+	errChan     = make(chan *utils.AppError, 1)
+	userChan    = make(chan *dormain.User, 1)
+	usersChan   = make(chan *[]dormain.User, 1)
+	respChan    = make(chan *utils.SuccessResponse, 1)
 )
 
 func (u *userService) GetUser(email string) (*dormain.User, *utils.AppError) {
-	errChan := make(chan *utils.AppError, 1)
-	userChan := make(chan *dormain.User, 1)
-
 	go func() {
 		user, err := dormain.UserDaoInterface.GetUser(email)
 		errChan <- err
@@ -26,15 +27,11 @@ func (u *userService) GetUser(email string) (*dormain.User, *utils.AppError) {
 	if err != nil {
 		return nil, err
 	}
-	close(userChan)
-	close(errChan)
 
 	return user, nil
 }
 
 func (u *userService) GetUsers() (*[]dormain.User, *utils.AppError) {
-	errChan := make(chan *utils.AppError, 1)
-	usersChan := make(chan *[]dormain.User, 1)
 
 	go func() {
 		users, err := dormain.UserDaoInterface.GetUsers()
@@ -48,16 +45,11 @@ func (u *userService) GetUsers() (*[]dormain.User, *utils.AppError) {
 	if err != nil {
 		return nil, err
 	}
-	close(usersChan)
-	close(errChan)
 
 	return users, nil
 }
 
 func (u *userService) AddUser(user dormain.User) (*utils.SuccessResponse, *utils.AppError) {
-
-	errChan := make(chan *utils.AppError, 1)
-	respChan := make(chan *utils.SuccessResponse, 1)
 
 	go func() {
 		resp, err := dormain.UserDaoInterface.AddUser(user)
@@ -71,8 +63,6 @@ func (u *userService) AddUser(user dormain.User) (*utils.SuccessResponse, *utils
 	if err != nil {
 		return nil, err
 	}
-	close(respChan)
-	close(errChan)
 
 	return resp, nil
 }

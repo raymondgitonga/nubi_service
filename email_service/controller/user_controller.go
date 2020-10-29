@@ -24,27 +24,29 @@ func AddUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated,resp)
+	c.JSON(http.StatusCreated, resp)
 }
 
 func GetUsers(c *gin.Context) {
 	var users *[]dormain.User
 
 	users, err := service.UserService.GetUsers()
-	if err!=nil{
+	if err != nil {
 		c.JSON(err.StatusCode, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, users)
 }
 
-func GetUser(c *gin.Context)  {
-	email:= c.Param("email")
+func GetUser(c *gin.Context) {
+	email := c.Param("email")
 
 	user, err := service.UserService.GetUser(email)
 
-	if err!=nil {
+	if err != nil {
 		c.JSON(err.StatusCode, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, user)
