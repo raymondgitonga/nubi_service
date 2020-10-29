@@ -9,12 +9,10 @@ import (
 
 type userDao struct{}
 
-func (u userDao) GetUser(email string) (*User, *utils.AppError) {
-	panic("implement me")
-}
-
 type userDaoInterface interface {
 	GetUser(email string) (*User, *utils.AppError)
+	GetUsers() (*[]User, *utils.AppError)
+	AddUser(user User) (*utils.SuccessResponse, *utils.AppError)
 }
 
 var (
@@ -25,18 +23,18 @@ func init() {
 	UserDaoInterface = &userDao{}
 }
 
-func GetUser(email string)(*User, *utils.AppError){
+func (u userDao) GetUser(email string) (*User, *utils.AppError) {
 	var singleUser User
 
-	if err:= utils.DBClient.Get(&singleUser,"SELECT name, email FROM nubi_email WHERE email = ?;", email);err!=nil{
+	if err := utils.DBClient.Get(&singleUser, "SELECT name, email FROM nubi_email WHERE email = ?;", email); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, &utils.AppError{
-				Message: utils.UserNotFound,
+				Message:    utils.UserNotFound,
 				StatusCode: http.StatusNotFound,
 			}
 		}
 		return nil, &utils.AppError{
-			Message: err.Error(),
+			Message:    err.Error(),
 			StatusCode: http.StatusInternalServerError,
 		}
 	}
@@ -44,28 +42,29 @@ func GetUser(email string)(*User, *utils.AppError){
 	return &singleUser, nil
 }
 
-func GetUsers()(*[]User, *utils.AppError){
+func (u userDao) GetUsers() (*[]User, *utils.AppError) {
 	var users []User
 
-	if err:= utils.DBClient.Select(&users,"SELECT name, email from nubi_email;"); err!=nil{
+	if err := utils.DBClient.Select(&users, "SELECT name, email from nubi_email;"); err != nil {
 		return nil, &utils.AppError{
-			Message: err.Error(),
+			Message:    err.Error(),
 			StatusCode: http.StatusInternalServerError,
 		}
 	}
 
 	return &users, nil
 }
-func AddUser(user User) (*utils.SuccessResponse, *utils.AppError) {
+
+func (u userDao) AddUser(user User) (*utils.SuccessResponse, *utils.AppError) {
 
 	res, err := utils.DBClient.Exec("INSERT INTO nubi_email (name, email) VALUES (?,?);",
 		user.Name, user.Email)
 
 	if err != nil {
 		me, _ := err.(*mysql.MySQLError)
-		if me.Number == 1062{
+		if me.Number == 1062 {
 			return nil, &utils.AppError{
-				Message: "email already registered",
+				Message:    "email already registered",
 				StatusCode: http.StatusBadRequest,
 			}
 		}
@@ -77,14 +76,14 @@ func AddUser(user User) (*utils.SuccessResponse, *utils.AppError) {
 
 	id, e := res.RowsAffected()
 
-	if e!=nil {
+	if e != nil {
 		return nil, &utils.AppError{
 			Message:    err.Error(),
 			StatusCode: http.StatusInternalServerError,
 		}
-	}else if id>0 {
+	} else if id > 0 {
 		return &utils.SuccessResponse{
-			Message: utils.UserSaved,
+			Message:    utils.UserSaved,
 			StatusCode: http.StatusOK,
 		}, nil
 	}
