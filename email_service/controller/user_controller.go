@@ -7,7 +7,23 @@ import (
 	"net/http"
 )
 
-func AddUser(c *gin.Context) {
+type userController struct{}
+
+type userControllerInterface interface {
+	AddUser(c *gin.Context)
+	GetUsers(c *gin.Context)
+	GetUser(c *gin.Context)
+}
+
+var (
+	UserControllerInterface userControllerInterface
+)
+
+func init() {
+	UserControllerInterface = &userController{}
+}
+
+func (u *userController) AddUser(c *gin.Context) {
 	var reqBody dormain.User
 
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
@@ -27,7 +43,7 @@ func AddUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-func GetUsers(c *gin.Context) {
+func (u *userController) GetUsers(c *gin.Context) {
 	var users *[]dormain.User
 
 	users, err := service.UserServiceInterface.GetUsers()
@@ -39,7 +55,7 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-func GetUser(c *gin.Context) {
+func (u *userController) GetUser(c *gin.Context) {
 	email := c.Param("email")
 
 	user, err := service.UserServiceInterface.GetUser(email)
