@@ -7,13 +7,23 @@ import (
 
 type userService struct{}
 
+type userServiceInterface interface {
+	GetUser(email string) (*dormain.User, *utils.AppError)
+	GetUsers() (*[]dormain.User, *utils.AppError)
+	AddUser(user dormain.User) (*utils.SuccessResponse, *utils.AppError)
+}
+
 var (
-	UserService userService
-	errChan     = make(chan *utils.AppError, 1)
-	userChan    = make(chan *dormain.User, 1)
-	usersChan   = make(chan *[]dormain.User, 1)
-	respChan    = make(chan *utils.SuccessResponse, 1)
+	UserServiceInterface userServiceInterface
+	errChan              = make(chan *utils.AppError, 1)
+	userChan             = make(chan *dormain.User, 1)
+	usersChan            = make(chan *[]dormain.User, 1)
+	respChan             = make(chan *utils.SuccessResponse, 1)
 )
+
+func init() {
+	UserServiceInterface = &userService{}
+}
 
 func (u *userService) GetUser(email string) (*dormain.User, *utils.AppError) {
 	go func() {

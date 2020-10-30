@@ -17,7 +17,7 @@ func AddUser(c *gin.Context) {
 		})
 		return
 	}
-	resp, err := service.UserService.AddUser(reqBody)
+	resp, err := service.UserServiceInterface.AddUser(reqBody)
 
 	if err != nil {
 		c.JSON(err.StatusCode, err)
@@ -30,7 +30,7 @@ func AddUser(c *gin.Context) {
 func GetUsers(c *gin.Context) {
 	var users *[]dormain.User
 
-	users, err := service.UserService.GetUsers()
+	users, err := service.UserServiceInterface.GetUsers()
 	if err != nil {
 		c.JSON(err.StatusCode, err)
 		return
@@ -42,7 +42,7 @@ func GetUsers(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	email := c.Param("email")
 
-	user, err := service.UserService.GetUser(email)
+	user, err := service.UserServiceInterface.GetUser(email)
 
 	if err != nil {
 		c.JSON(err.StatusCode, err)
