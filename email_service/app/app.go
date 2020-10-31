@@ -13,11 +13,12 @@ func init() {
 	router = gin.Default()
 }
 func StartApp() {
-	mapUrls()
+
 	port := os.Getenv("PORT")
 	errChan := make(chan error, 1)
 
 	go func() {
+		mapUrls()
 		err := router.Run(port)
 		errChan <- err
 	}()
