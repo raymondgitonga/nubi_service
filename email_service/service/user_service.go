@@ -17,8 +17,6 @@ var (
 	UserServiceInterface userServiceInterface
 	errChan              = make(chan *utils.AppError, 1)
 	userChan             = make(chan *dormain.User, 1)
-	usersChan            = make(chan *[]dormain.User, 1)
-	respChan             = make(chan *utils.SuccessResponse, 1)
 )
 
 func init() {
@@ -42,6 +40,7 @@ func (u *userService) GetUser(email string) (*dormain.User, *utils.AppError) {
 }
 
 func (u *userService) GetUsers() (*[]dormain.User, *utils.AppError) {
+	usersChan := make(chan *[]dormain.User, 1)
 
 	go func() {
 		users, err := dormain.UserDaoInterface.GetUsers()
@@ -60,6 +59,7 @@ func (u *userService) GetUsers() (*[]dormain.User, *utils.AppError) {
 }
 
 func (u *userService) AddUser(user dormain.User) (*utils.SuccessResponse, *utils.AppError) {
+	respChan := make(chan *utils.SuccessResponse, 1)
 
 	go func() {
 		resp, err := dormain.UserDaoInterface.AddUser(user)
