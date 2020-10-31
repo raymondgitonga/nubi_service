@@ -15,7 +15,13 @@ func init() {
 func StartApp() {
 	mapUrls()
 	port := os.Getenv("PORT")
-	if err := router.Run(port); err != nil {
+	errChan := make(chan error, 1)
+
+	go func() {
+		err := router.Run(port)
+		errChan <- err
+	}()
+	if err := <-errChan; err != nil {
 		panic(err)
 	}
 }
