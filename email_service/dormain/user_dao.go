@@ -57,8 +57,17 @@ func (u userDao) GetUsers() (*[]User, *utils.AppError) {
 
 func (u userDao) AddUser(user User) (*utils.SuccessResponse, *utils.AppError) {
 
+	userName, userEmail := user.Name, user.Email
+
+	if len(userEmail) == 0 || len(userName) == 0 {
+		return nil, &utils.AppError{
+			Message:    "name or email is missing",
+			StatusCode: http.StatusBadRequest,
+		}
+	}
+
 	res, err := utils.DBClient.Exec("INSERT INTO nubi_email (name, email) VALUES (?,?);",
-		user.Name, user.Email)
+		userName, userEmail)
 
 	if err != nil {
 		me, _ := err.(*mysql.MySQLError)
